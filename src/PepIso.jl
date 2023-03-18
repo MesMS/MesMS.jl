@@ -170,9 +170,9 @@ split_ions(ions, spec, ε, V) = begin
     for (i, com) in enumerate(coms)
         tab[com] .= i
     end
-    slices = map(_ -> Peak[], coms)
+    slices = map(_ -> MesMS.Peak[], coms)
     for c in cs
-        push!(slices[tab[c.slots[begin].i]], Peak(c.mz, c.inten))
+        push!(slices[tab[c.slots[begin].i]], MesMS.Peak(c.mz, c.inten))
     end
     return map(idxs -> ions[idxs], coms), slices
 end
