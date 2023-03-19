@@ -41,4 +41,9 @@ include("io/FASTA.jl")
 include("IPV.jl")
 include("PepIso.jl")
 
+include("plot/Plot.jl")
+include("plot/Plots.jl")
+include("plot/Plotly.jl")
+include("plot/PyPlot.jl")
+
 end
