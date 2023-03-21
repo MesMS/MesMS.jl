@@ -7,13 +7,16 @@ import ProgressMeter: @showprogress
 
 import ..MesMS
 
-prefilter(ion, spec, ε, V, max_mode=false) = begin
+prefilter(ion, spec, ε, V, mode=:mono) = begin
     f = x -> (x > 0) && !isempty(MesMS.query_ε(spec, MesMS.ipv_mz(ion, x, V), ε))
-    if max_mode
+    if mode == :mono
+        return f(1) && f(2)
+    elseif mode == :max
         i = argmax(MesMS.ipv_w(ion, V))
         return f(i) && (f(i + 1) || f(i - 1))
     else
-        return f(1) && f(2)
+        @error "unknown mode: $(mode)"
+        return false
     end
 end
 
