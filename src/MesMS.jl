@@ -38,6 +38,7 @@ include("util.jl")
 include("io/MSx.jl")
 include("io/MGF.jl")
 include("io/FASTA.jl")
+include("io/extra.jl")
 include("IPV.jl")
 include("PepIso.jl")
 
