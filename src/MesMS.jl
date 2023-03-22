@@ -15,7 +15,7 @@ query(a, lower, upper) = a[argquery(a, lower, upper)]
 query_δ(a, x, δ) = query(a, x - δ, x + δ)
 query_ε(a, x, ε) = query_δ(a, x, ε * x)
 
-argquery_near(a, x; by) = begin
+argquery_near(a, x; by=identity) = begin
     i = searchsortedfirst(a, x)
     if i > lastindex(a)
         return lastindex(a)
