@@ -38,4 +38,23 @@ end
 log_softer(s=1) = x -> copysign(s * (log(abs(x) + s) - log(s)), x)
 exp_softer(s=1) = x -> x * exp(-abs(x)/s)
 
+calc_tda_fdr_xl(xs, r=1.0) = begin
+    tt, td, dd = 0, 0, 0
+    fdr = zeros(length(xs))
+    for (i, x) in enumerate(xs)
+        if x == :TT tt += 1
+        elseif x == :TD td += 1
+        elseif x == :DD dd += 1
+        else error("unexcepted T/D type: $(x)")
+        end
+        fdr[i] = max(dd / r^2, (td / r - dd / r^2)) / tt
+    end
+    v = 1.0
+    for i in reverse(eachindex(fdr))
+        v = min(v, fdr[i])
+        fdr[i] = v
+    end
+    return fdr
+end
+
 include("esimate_td_xl.jl")
