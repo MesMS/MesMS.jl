@@ -11,16 +11,26 @@ end
 
 "`input` accept the same types as `CSV.File` including file path and `IO`"
 read_cross_link_pair(input) = begin
-    T_v = typeof((idx=0, mz=0.0, z=0, pairs=[(0.0, 0.0)]))
+    T_v = typeof((scan=0, xl=0, mz=0.0, z=0, pairs=[(0.0, 0.0)]))
     P = Dict{Int, Vector{T_v}}()
     for r in CSV.File(input)
-        v = get!(P, r.scan, T_v[])
-        i = findfirst(x -> x.idx == r.prec, v)
+        ions = get!(P, r.scan, T_v[])
+        i = findfirst(x -> x.xl == r.xl, ions)
         if isnothing(i)
-            push!(v, (; idx=r.prec, r.mz, r.z, pairs=typeof((0.0, 0.0))[]))
-            i = length(v)
+            push!(ions, (; r.scan, r.xl, r.mz, r.z, pairs=typeof((0.0, 0.0))[]))
+            i = length(ions)
         end
-        push!(v[i].pairs, (r.a, r.b))
+        push!(ions[i].pairs, (r.a, r.b))
     end
     return P
+end
+
+write_cross_link_pair(path, P) = begin
+    rows = []
+    for ions in P, ion in ions, pair in ion.pairs
+        push!(rows, (; ion.scan, ion.xl, ion.mz, ion.z, a=pair[1], b=pair[2]))
+    end
+    @info "cross-link pair saving to " * path
+    CSV.write(path * "~", rows)
+    mv(path * "~", path; force=true)
 end
