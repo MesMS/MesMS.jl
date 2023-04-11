@@ -125,7 +125,9 @@ MesMS.Plot.error!(ax::Makie.Axis, ions, ε; x=:mz_exp, y=:error, markersize=8, m
     ys = [getproperty(i, y) for i in ions]
     marker = [:shape in propertynames(i) ? i.shape : :circle for i in ions]
     color = [:color in propertynames(i) ? (i.color, markeralpha) : (:black, markeralpha) for i in ions]
-    Makie.scatter!(ax, xs, ys; marker, color, markersize)
+    if !isempty(ions)
+        Makie.scatter!(ax, xs, ys; marker, color, markersize)
+    end
     Makie.ylims!(ax, -ε * 1.0e6 * 1.19, ε * 1.0e6 * 1.19)
     return ax
 end
