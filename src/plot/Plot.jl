@@ -5,10 +5,16 @@ import ..MesMS
 include("api.jl")
 
 const ion_a = (sym=:a, part=:l, Δ=MesMS.Formula(C=-1, O=-1), color=:lightgreen)
+const ion_a_NH3 = (sym=Symbol("a*"), part=:l, Δ=MesMS.Formula(H=-3, C=-1, N=-1, O=-1), color=:lightgreen)
+const ion_a_H2O = (sym=Symbol("a∘"), part=:l, Δ=MesMS.Formula(H=-2, C=-1, O=-2), color=:lightgreen)
 const ion_b = (sym=:b, part=:l, Δ=MesMS.Formula(), color=:green)
+const ion_b_NH3 = (sym=Symbol("b*"), part=:l, Δ=MesMS.Formula(H=-3, N=-1), color=:green)
+const ion_b_H2O = (sym=Symbol("b∘"), part=:l, Δ=MesMS.Formula(H=-2, O=-1), color=:green)
 const ion_c = (sym=:c, part=:l, Δ=MesMS.Formula(H=3, N=1), color=:darkgreen)
 const ion_x = (sym=:x, part=:r, Δ=MesMS.Formula(C=1, O=2), color=:lightred)
 const ion_y = (sym=:y, part=:r, Δ=MesMS.Formula(H=2, O=1), color=:red)
+const ion_y_NH3 = (sym=Symbol("y*"), part=:r, Δ=MesMS.Formula(H=-1, N=-1, O=1), color=:red)
+const ion_y_H2O = (sym=Symbol("y∘"), part=:r, Δ=MesMS.Formula(), color=:red)
 const ion_z = (sym=:z, part=:r, Δ=MesMS.Formula(H=-1, N=-1, O=1), color=:darkred)
 
 lsum_seq(seq, mods, tab_aa, tab_mod) = begin
