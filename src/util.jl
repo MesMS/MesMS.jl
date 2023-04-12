@@ -1,5 +1,8 @@
 using Dates
 
+split(str::AbstractString, args...; kwargs...) = Base.split(str, args...; kwargs...)
+split(::Missing, args...; kwargs...) = SubString{AbstractString}[]
+
 match_path(path, ext="") = begin
     paths = readdir(dirname(path); join=true)
     return filter(p -> startswith(basename(p), basename(path)) && endswith(p, ext), paths)
