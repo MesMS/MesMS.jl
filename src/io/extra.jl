@@ -32,9 +32,9 @@ read_cross_link_pair(input) = begin
     return P
 end
 
-write_cross_link_pair(path, P) = begin
+write_cross_link_pair(path, ions) = begin
     rows = []
-    for ions in P, ion in ions, pair in ion.pairs
+    for ion in ions, pair in ion.pairs
         push!(rows, (; ion.scan, ion.xl, ion.mz, ion.z, a=pair[1], b=pair[2]))
     end
     @info "cross-link pair saving to " * path
