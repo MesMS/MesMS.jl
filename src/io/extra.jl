@@ -9,6 +9,13 @@ read_precursor(input) = begin
     return I
 end
 
+write_precursor(path, ions) = begin
+    ions = map(i -> (; i.scan, i.mz, i.z), ions)
+    @info "precursor ion saving to " * path
+    CSV.write(path * "~", ions)
+    mv(path * "~", path; force=true)
+end
+
 "`input` accept the same types as `CSV.File` including file path and `IO`"
 read_cross_link_pair(input) = begin
     T_v = typeof((scan=0, xl=0, mz=0.0, z=0, pairs=[(0.0, 0.0)]))
