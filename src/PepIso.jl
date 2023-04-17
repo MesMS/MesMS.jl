@@ -128,18 +128,12 @@ evaluate_rlp(ions, spec, ε, V) = begin
     return xs, ms
 end
 
-evaluators = Dict(
-    :LP => evaluate_lp,
-    :RLP => evaluate_rlp,
-)
-
-deisotope(ions, spec, τ_max, ε, V, evaluator=:LP) = begin
-    evaluator = evaluators[evaluator]
+deisotope(f, ions, spec, τ_max, ε, V) = begin
     xs = ms = nothing
     τs = [τ_max / 4, τ_max / 2, τ_max]
     τ = popfirst!(τs)
     while true
-        xs, ms = evaluator(ions, spec, ε, V)
+        xs, ms = f(ions, spec, ε, V)
         s = exclude(ions, xs, ms, τ, ε, V)
         while all(s)
             isempty(τs) && @goto done
@@ -151,6 +145,8 @@ deisotope(ions, spec, τ_max, ε, V, evaluator=:LP) = begin
     @label done
     return [(; i.mz, i.z, x, m) for (i, x, m) in zip(ions, xs, ms)]
 end
+
+deisotope(ions, spec, τ_max, ε, V) = deisotope(evaluate_lp, ions, spec, τ_max, ε, V)
 
 split_ions(ions, spec, ε, V) = begin
     items = [(; i, n, mz=MesMS.ipv_mz(ion, n, V)) for (i, ion) in enumerate(ions) for n in eachindex(MesMS.ipv_w(ion, V))]
