@@ -128,7 +128,7 @@ evaluate_rlp(ions, spec, ε, V) = begin
     return xs, ms
 end
 
-deisotope(f, ions, spec, τ_max, ε, V) = begin
+_deisotope(f, ions, spec, τ_max, ε, V) = begin
     xs = ms = nothing
     τs = [τ_max / 4, τ_max / 2, τ_max]
     τ = popfirst!(τs)
@@ -146,7 +146,18 @@ deisotope(f, ions, spec, τ_max, ε, V) = begin
     return [(; i.mz, i.z, x, m) for (i, x, m) in zip(ions, xs, ms)]
 end
 
-deisotope(ions, spec, τ_max, ε, V) = deisotope(evaluate_lp, ions, spec, τ_max, ε, V)
+deisotope(f, ions, spec, τ_max, ε, V; split=false) = begin
+    if split
+        scores = map(zip(split_ions(ions, spec, ε, V)...)) do (ions_sub, spec_sub)
+            return _deisotope(f, ions_sub, spec_sub, τ_max, ε, V)
+        end
+        return reduce(vcat, scores; init=typeof((; mz=0.0, z=0, x=0.0, m=0.0))[])
+    else
+        return _deisotope(f, ions, spec, τ_max, ε, V)
+    end
+end
+
+deisotope(ions, spec, τ_max, ε, V; split=false) = deisotope(evaluate_lp, ions, spec, τ_max, ε, V; split)
 
 split_ions(ions, spec, ε, V) = begin
     items = [(; i, n, mz=MesMS.ipv_mz(ion, n, V)) for (i, ion) in enumerate(ions) for n in eachindex(MesMS.ipv_w(ion, V))]
