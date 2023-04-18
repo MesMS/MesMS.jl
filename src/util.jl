@@ -3,11 +3,11 @@ using Dates
 split(str::AbstractString, args...; kwargs...) = Base.split(str, args...; kwargs...)
 split(::Missing, args...; kwargs...) = SubString{AbstractString}[]
 
-match_path(path, ext=""; self=true) = begin
+match_path(path, ext=""; join=true, self=true) = begin
     files = filter(readdir(dirname(path))) do f
         (self && (f == basename(path))) || (startswith(f, basename(path)) && endswith(f, ext))
     end
-    return joinpath.(dirname(path), files)
+    return join ? joinpath.(dirname(path), files) : files
 end
 
 read_all(reader, path, ext=""; single=false, key=first∘splitext∘basename) = begin
