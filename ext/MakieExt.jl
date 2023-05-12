@@ -8,7 +8,7 @@ import MesMS
 
 __init__() = begin
     Makie.update_theme!(
-        font = "Helvetica",
+        font = "Helvetica Neue",
         Axis = (
             backgroundcolor = :grey90,
             topspinevisible = false,
