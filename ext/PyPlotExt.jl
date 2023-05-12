@@ -80,23 +80,23 @@ _plot_seq!(ax, x, y, seq, mods, ions, font, vspace; frag_error=true) = begin
     colors = [:black for _ in seq]
     foreach(m -> colors[m[2]] = :red, mods)
     for (i, aa) in enumerate(seq)
-        ax.text(x + i - 0.5, y, string(aa); fontsize=font, color=colors[i], ha=:center)
+        ax.text(x + i - 0.5, y, string(aa); fontsize=font, color=colors[i], ha=:center, va=:center)
     end
     n = Dict()
     for i in filter(i -> i.peak > 0, ions)
         n[(i.part, i.loc)] = get(n, (i.part, i.loc), 0) + 1
         if i.part == :l
-            ax.text(x + i.loc - 0.1, y - vspace / 3, "]"; color=i.color, fontsize=font, ha=:center)
-            ax.text(x + i.loc - 0.1, y - (n[(i.part, i.loc)] / 2 + 0.5) * vspace, i.text; fontsize=font ÷ 3, color=i.color, ha=:right)
+            ax.text(x + i.loc + 0.3, y - 0.2 * vspace, "┛"; color=i.color, fontsize=font, ha=:right, va=:top)
+            ax.text(x + i.loc, y - 0.2 * vspace - n[(i.part, i.loc)] * 0.4 * vspace, i.text; fontsize=font ÷ 2, color=i.color, ha=:right, va=:top)
         elseif i.part == :r
-            ax.text(x + i.loc + 0.1, y + vspace / 3, "["; color=i.color, fontsize=font, ha=:center)
-            ax.text(x + i.loc + 0.1, y + (n[(i.part, i.loc)] / 2 + 0.6) * vspace, i.text; fontsize=font ÷ 3, color=i.color, ha=:left)
+            ax.text(x + i.loc - 0.3, y + 0.2 * vspace, "┏"; color=i.color, fontsize=font, ha=:left, va=:bottom)
+            ax.text(x + i.loc, y + 0.3 * vspace + n[(i.part, i.loc)] * 0.4 * vspace, i.text; fontsize=font ÷ 2, color=i.color, ha=:left, va=:bottom)
         end
     end
     if frag_error
         errors = [i.error for i in ions]
         text = @sprintf("\$\\mu=%+0.2f\$ ppm\n\$\\sigma=\\pm %0.2f\$ ppm", mean(errors), std(errors))
-        ax.text(x + length(seq) + 0.5, y, text; fontsize=font ÷ 2, ha="left")
+        ax.text(x + length(seq) + 0.5, y, text; fontsize=font ÷ 2, ha=:left, va=:center)
     end
     return ax
 end
@@ -126,11 +126,11 @@ MesMS.Plot.spec!(ax::PyCall.PyObject, spec, ions; vspace=5.0, hspace=1/20, font=
     ys_ = zeros(length(spec))
     for i in ions
         ys_[i.peak] = max(maximum(ys_[MesMS.argquery_δ(xs_, xs_[i.peak], hspace / 2)]) + vspace, ys[i.peak])
-        ax.text(xs[i.peak], ys_[i.peak], i.text; fontsize=font, i.color, va=:bottom, ha=:center)
+        ax.text(xs[i.peak], ys_[i.peak], i.text; fontsize=font, i.color, ha=:center, va=:bottom)
     end
     ax.set_xlabel("m/z (Th)")
     ax.set_ylim(0, 114)
-    ax.set_ylabel("intensity (\\%)")
+    ax.set_ylabel("intensity (%)")
     return ax
 end
 
