@@ -12,8 +12,8 @@ __init__() = begin
     MesMS.PyPlot.plt_venn = PyCall.pyimport("matplotlib_venn")
 
     MesMS.PyPlot.mpl.style.use("ggplot")
-    MesMS.PyPlot.mpl.rc("text", usetex=true)
     MesMS.PyPlot.mpl.rc("font", family="Helvetica Neue")
+    MesMS.PyPlot.mpl.rc("mathtext", fontset="cm")
     MesMS.PyPlot.mpl.rc("figure", dpi=360)
 end
 
