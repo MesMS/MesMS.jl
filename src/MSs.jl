@@ -5,6 +5,9 @@ Base.isless(a::AbstractMS, b::AbstractMS) = a.id < b.id
 
 Base.@kwdef struct MS1 <: AbstractMS
     id::Int = 0
+    total_ion_current::Float64 = 0.0
+    base_peak_intensity::Float64 = 0.0
+    base_peak_mass::Float64 = 0.0
     retention_time::Float64 = 0.0
     injection_time::Float64 = 0.0
     peaks::Vector{<:AbstractPeak} = Peak[]
@@ -13,6 +16,9 @@ end
 Base.@kwdef struct MS2 <: AbstractTandemMS
     id::Int = 0
     pre::Int = 0
+    total_ion_current::Float64 = 0.0
+    base_peak_intensity::Float64 = 0.0
+    base_peak_mass::Float64 = 0.0
     retention_time::Float64 = 0.0
     injection_time::Float64 = 0.0
     activation_center::Float64 = 0.0

@@ -3,6 +3,9 @@ using Base: Filesystem
 read_ms1(io::IO) = begin
     M = MS1[]
     id = 0
+    total_ion_current = 0.0
+    base_peak_intensity = 0.0
+    base_peak_mass = 0.0
     retention_time = 0.0
     injection_time = 0.0
     peaks = Peak[]
@@ -13,14 +16,25 @@ read_ms1(io::IO) = begin
         elseif line[1] == 'H'
             continue
         elseif line[1] == 'S'
-            length(peaks) > 0 && push!(M, MS1(; id, retention_time, injection_time, peaks))
+            !isempty(peaks) && push!(M, MS1(;
+                id, total_ion_current, base_peak_intensity, base_peak_mass, retention_time, injection_time, peaks,
+            ))
             id = parse(Int, split(line[3:end])[1])
+            total_ion_current = 0.0
+            base_peak_intensity = 0.0
+            base_peak_mass = 0.0
             retention_time = 0.0
             injection_time = 0.0
             peaks = Peak[]
         elseif line[1] == 'I'
             k, v = split(line[3:end])
-            if k == "RetentionTime" || k == "RetTime"  || k == "RTime"
+            if k == "TotalIonCurrent"
+                total_ion_current = parse(Float64, v)
+            elseif k == "BasePeakIntensity"
+                base_peak_intensity = parse(Float64, v)
+            elseif k == "BasePeakMass"
+                base_peak_mass = parse(Float64, v)
+            elseif k == "RetentionTime" || k == "RetTime"  || k == "RTime"
                 retention_time = parse(Float64, v)
             elseif k == "IonInjectionTime" || k == "InjectionTime"
                 injection_time = parse(Float64, v)
@@ -30,7 +44,9 @@ read_ms1(io::IO) = begin
             push!(peaks, Peak(parse(Float64, m), parse(Float64, i)))
         end
     end
-    length(peaks) > 0 && push!(M, MS1(; id, retention_time, injection_time, peaks))
+    !isempty(peaks) && push!(M, MS1(;
+        id, total_ion_current, base_peak_intensity, base_peak_mass, retention_time, injection_time, peaks,
+    ))
     return M
 end
 
@@ -38,6 +54,9 @@ read_ms2(io::IO) = begin
     M = MS2[]
     id = 0
     pre = 0
+    total_ion_current = 0.0
+    base_peak_intensity = 0.0
+    base_peak_mass = 0.0
     retention_time = 0.0
     injection_time = 0.0
     activation_center = 0.0
@@ -51,10 +70,16 @@ read_ms2(io::IO) = begin
         elseif line[1] == 'H'
             continue
         elseif line[1] == 'S'
-            length(peaks) > 0 && push!(M, MS2(; id, pre, retention_time, injection_time, activation_center, isolation_width, ions, peaks))
+            !isempty(peaks) && push!(M, MS2(; id, pre,
+                total_ion_current, base_peak_intensity, base_peak_mass,
+                retention_time, injection_time, activation_center, isolation_width, ions, peaks,
+            ))
             items = split(line[3:end])
             id = parse(Int, items[1])
             pre = 0
+            total_ion_current = 0.0
+            base_peak_intensity = 0.0
+            base_peak_mass = 0.0
             retention_time = 0.0
             injection_time = 0.0
             activation_center = length(items) >= 3 ? parse(Float64, items[3]) : 0.0
@@ -65,6 +90,12 @@ read_ms2(io::IO) = begin
             k, v = split(line[3:end])
             if k == "PrecursorScan"
                 pre = parse(Int, v)
+            elseif k == "TotalIonCurrent"
+                total_ion_current = parse(Float64, v)
+            elseif k == "BasePeakIntensity"
+                base_peak_intensity = parse(Float64, v)
+            elseif k == "BasePeakMass"
+                base_peak_mass = parse(Float64, v)
             elseif k == "RetentionTime" || k == "RetTime"  || k == "RTime"
                 retention_time = parse(Float64, v)
             elseif k == "IonInjectionTime" || k == "InjectionTime"
@@ -84,7 +115,10 @@ read_ms2(io::IO) = begin
             push!(peaks, Peak(parse(Float64, m), parse(Float64, i)))
         end
     end
-    length(peaks) > 0 && push!(M, MS2(; id, pre, retention_time, injection_time, activation_center, isolation_width, ions, peaks))
+    !isempty(peaks) && push!(M, MS2(; id, pre,
+        total_ion_current, base_peak_intensity, base_peak_mass,
+        retention_time, injection_time, activation_center, isolation_width, ions, peaks,
+    ))
     return M
 end
 
@@ -93,6 +127,9 @@ read_ms2(fname::AbstractString) = open(read_ms2, fname)
 
 write_ms1(io::IO, m::AbstractMS) = begin
     write(io, "S\t$(m.id)\t$(m.id)\n")
+    write(io, "I\tTotalIonCurrent\t$(m.total_ion_current)\n")
+    write(io, "I\tBasePeakIntensity\t$(m.base_peak_intensity)\n")
+    write(io, "I\tBasePeakMass\t$(m.base_peak_mass)\n")
     write(io, "I\tRetentionTime\t$(m.retention_time)\n")
     write(io, "I\tIonInjectionTime\t$(m.injection_time)\n")
     foreach(p -> write(io, "$(p.mz) $(p.inten)\n"), m.peaks)
@@ -101,6 +138,9 @@ end
 write_ms2(io::IO, m::AbstractTandemMS) = begin
     write(io, "S\t$(m.id)\t$(m.id)\t$(m.activation_center)\n")
     write(io, "I\tPrecursorScan\t$(m.pre)\n")
+    write(io, "I\tTotalIonCurrent\t$(m.total_ion_current)\n")
+    write(io, "I\tBasePeakIntensity\t$(m.base_peak_intensity)\n")
+    write(io, "I\tBasePeakMass\t$(m.base_peak_mass)\n")
     write(io, "I\tRetentionTime\t$(m.retention_time)\n")
     write(io, "I\tIonInjectionTime\t$(m.injection_time)\n")
     write(io, "I\tActivationCenter\t$(m.activation_center)\n")
