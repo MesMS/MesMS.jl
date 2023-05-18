@@ -32,6 +32,7 @@ end
 date_mark(date=today()) = replace(string(date), "-"=>"")
 
 open_url(url) = begin
+    @info "opening " * url
     if Sys.isapple()
         run(`open $(url)`)
     elseif Sys.iswindows()
