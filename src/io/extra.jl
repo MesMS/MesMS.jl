@@ -10,12 +10,7 @@ read_precursor(input; verbose=true) = begin
     return I
 end
 
-write_precursor(path, ions) = begin
-    ions = map(i -> (; i.scan, i.mz, i.z), ions)
-    @info "precursor ion saving to " * path
-    CSV.write(path * "~", ions)
-    mv(path * "~", path; force=true)
-end
+write_precursor(path, ions) = CSV.write(path, map(i -> (; i.scan, i.mz, i.z), ions))
 
 "`input` accept the same types as `CSV.File` including file path and `IO`"
 read_cross_link_pair(input; verbose=true) = begin
@@ -35,11 +30,5 @@ read_cross_link_pair(input; verbose=true) = begin
 end
 
 write_cross_link_pair(path, ions) = begin
-    rows = []
-    for ion in ions, pair in ion.pairs
-        push!(rows, (; ion.scan, ion.xl, ion.mz, ion.z, a=pair[1], b=pair[2]))
-    end
-    @info "cross-link pair saving to " * path
-    CSV.write(path * "~", rows)
-    mv(path * "~", path; force=true)
+    CSV.write(path, [(; i.scan, i.xl, i.mz, i.z, a=p[1], b=p[2]) for i in ions for p in i.pairs])
 end
