@@ -68,16 +68,16 @@ calc_ipv(ms, E, n_mean, trunc=0.99) = begin
     return V
 end
 
-build_ipv(fname=joinpath(homedir(), ".PepIso", "IPV.bson"), r=1:20000, trunc=0.99) = begin
+build_ipv(fname=joinpath(homedir(), ".PepIso", "IPV.bson"), r=1:20000, trunc=0.99; verbose=true) = begin
     if isfile(fname)
-        @info "IPV loading from " * fname
+        verbose && @info "IPV loading from " * fname
         BSON.@load fname V
     else
-        @info "IPV building"
+        verbose && @info "IPV building"
         E = [Iso_H, Iso_C, Iso_N, Iso_O, Iso_S]
         n_mean = sum(a -> a.n .* a.w, aa_elements)
         V = calc_ipv(r, E, n_mean, trunc)
-        @info "IPV caching as " * fname
+        verbose && @info "IPV caching as " * fname
         mkpath(dirname(fname))
         BSON.@save fname V
     end

@@ -11,6 +11,11 @@ read_fasta(io::IO; itol=true) = begin
     return Dict{String, String}(map(s -> (s.name, join(s.lines)), seqs))
 end
 
+read_fasta(fname::AbstractString; verbose=true, itol=true) = begin
+    verbose && @info "FASTA reading from " * fname
+    return open(io -> read_fasta(io; itol), fname)
+end
+
 write_fasta(io::IO, S::Dict; n=60, itol=true) = begin
     for (k, v) in S
         v = unify_aa_seq(v; itol)
@@ -23,5 +28,4 @@ write_fasta(io::IO, S::Dict; n=60, itol=true) = begin
     return io
 end
 
-read_fasta(fname::AbstractString; itol=true) = open(io -> read_fasta(io; itol), fname)
 write_fasta(fname::AbstractString, S::Dict; n=60, itol=true) = open(io -> write_fasta(io, S; n, itol), fname; write=true)

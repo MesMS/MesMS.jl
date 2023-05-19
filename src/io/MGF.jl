@@ -27,7 +27,10 @@ read_mgf(io::IO) = begin
     return M
 end
 
-read_mgf(fname::AbstractString) = open(read_mgf, fname)
+read_mgf(fname::AbstractString; verbose=true) = begin
+    verbose && @info "MGF reading from " * fname
+    return open(read_mgf, fname)
+end
 
 write_mgf(io::IO, m::AbstractTandemMS, title="$(m.id)") = begin
     for ion in m.ions

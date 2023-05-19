@@ -1,7 +1,8 @@
 import CSV
 
 "`input` accept the same types as `CSV.File` including file path and `IO`"
-read_precursor(input) = begin
+read_precursor(input; verbose=true) = begin
+    verbose && isa(input, AbstractString) && @info "precursor ion reading from " * input
     I = Dict{Int, Vector{Ion}}()
     for r in CSV.File(input)
         push!(get!(I, r.scan, Ion[]), Ion(r.mz, r.z))
@@ -17,7 +18,8 @@ write_precursor(path, ions) = begin
 end
 
 "`input` accept the same types as `CSV.File` including file path and `IO`"
-read_cross_link_pair(input) = begin
+read_cross_link_pair(input; verbose=true) = begin
+    verbose && isa(input, AbstractString) && @info "cross link pair reading from " * input
     T_v = typeof((scan=0, xl=0, mz=0.0, z=0, pairs=[(0.0, 0.0)]))
     P = Dict{Int, Vector{T_v}}()
     for r in CSV.File(input)

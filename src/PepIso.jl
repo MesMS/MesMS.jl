@@ -187,12 +187,12 @@ split_ions(ions, spec, ε, V) = begin
     return map(idxs -> ions[idxs], coms), slices
 end
 
-group_ions(I, gap, ε) = begin
+group_ions(I, gap, ε; verbose=true) = begin
     G = []
     z_max = [maximum(map(i -> i.z, ions)) for ions in I if !isempty(ions)] |> maximum
     z_min = [minimum(map(i -> i.z, ions)) for ions in I if !isempty(ions)] |> minimum
     for z in z_min:z_max
-        @info "grouping (charge state: $(z))"
+        verbose && @info "grouping (charge state: $(z))"
         tmp = []
         gs = ones(Int, length(tmp))
         @showprogress for ions in I

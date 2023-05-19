@@ -10,13 +10,13 @@ match_path(path, ext=""; join=true, self=true) = begin
     return join ? joinpath.(dirname(path), files) : files
 end
 
-read_all(reader, path, ext=""; single=false, key=first∘splitext∘basename) = begin
+read_all(reader, path, ext=""; verbose=true, single=false, key=first∘splitext∘basename) = begin
     paths = match_path(path, ext)
     if single && length(paths) > 1
         @warn "multiple files found: path=$(path), ext=$(ext)"
     end
     return map(paths) do p
-        @info "reading from " * p
+        verbose && @info "reading from " * p
         key(p) => reader(p)
     end |> Dict
 end
@@ -31,8 +31,8 @@ end
 
 date_mark(date=today()) = replace(string(date), "-"=>"")
 
-open_url(url) = begin
-    @info "opening " * url
+open_url(url; verbose=true) = begin
+    verbose && @info "opening " * url
     if Sys.isapple()
         run(`open $(url)`)
     elseif Sys.iswindows()

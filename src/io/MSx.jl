@@ -122,8 +122,15 @@ read_ms2(io::IO) = begin
     return M
 end
 
-read_ms1(fname::AbstractString) = open(read_ms1, fname)
-read_ms2(fname::AbstractString) = open(read_ms2, fname)
+read_ms1(fname::AbstractString; verbose=true) = begin
+    verbose && @info "MS1 reading from " * fname
+    return open(read_ms1, fname)
+end
+
+read_ms2(fname::AbstractString; verbose=true) = begin
+    verbose && @info "MS2 reading from " * fname
+    return open(read_ms2, fname)
+end
 
 write_ms1(io::IO, m::AbstractMS) = begin
     write(io, "S\t$(m.id)\t$(m.id)\n")
@@ -157,7 +164,7 @@ count_msx(path, ext; verbose=true) = begin
     verbose && @info "counting $(path)"
     s = sum(match_path(path, ext)) do f
         n = count(l -> startswith(l, "S\t"), readlines(f))
-        @info "$(basename(f)):\t$(n)"
+        verbose && @info "$(basename(f)):\t$(n)"
         return n
     end
     verbose && @info "total:\t$(s)"

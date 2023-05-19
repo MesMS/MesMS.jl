@@ -28,12 +28,12 @@ end
 
 query_near(a, x; by=identity) = a[argquery_near(a, x; by)]
 
-safe_save(f, path, prefix="") = begin
+safe_save(f, path, prefix=""; verbose=true) = begin
     prefix = isempty(prefix) ? "" : prefix * " "
-    @info "$(prefix)saving to $(path)"
+    verbose && @info "$(prefix)saving to $(path)"
     f(path * "~")
     mv(path * "~", path; force=true)
-    @info "$(prefix)saved to $(path)"
+    verbose && @info "$(prefix)saved to $(path)"
 end
 
 include("Consts.jl")
