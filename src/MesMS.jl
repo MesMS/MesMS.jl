@@ -29,6 +29,7 @@ end
 query_near(a, x; by=identity) = a[argquery_near(a, x; by)]
 
 safe_save(f, path, prefix=""; verbose=true) = begin
+    mkpath(dirname(path))
     prefix = isempty(prefix) ? "" : prefix * " "
     verbose && @info "$(prefix)saving to $(path)"
     f(path * "~")
