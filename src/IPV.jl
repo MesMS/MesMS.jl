@@ -1,4 +1,3 @@
-import BSON
 import ProgressMeter: @showprogress
 
 aa_elements = (  # H,  C, N, O, S
@@ -24,71 +23,89 @@ aa_elements = (  # H,  C, N, O, S
     (sym=:Val, n=[ 9,  5, 1, 1, 0], w=0.0673),
 )
 
-Iso_H = [(m=1.007825, w=0.99985), (m=2.0140, w=0.00015)]
-Iso_C = [(m=12., w=0.9889), (m=13.00335, w=0.0111)]
-Iso_N = [(m=14.00307, w=0.9964), (m=15.00011, w=0.0036)]
-Iso_O = [(m=15.99491, w=0.9976), (m=16.99913, w=0.0004), (m=17.99916, w=0.002)]
-Iso_S = [(m=31.97207, w=0.950), (m=32.97146, w=0.0076), (m=33.96786, w=0.0422)]
+Iso_H = (w=[0.99985, 0.00015], m=[1.007825, 2.0140])
+Iso_C = (w=[0.9889, 0.0111], m=[12., 13.00335])
+Iso_N = (w=[0.9964, 0.0036], m=[14.00307, 15.00011])
+Iso_O = (w=[0.9976, 0.0004, 0.002], m=[15.99491, 16.99913, 17.99916])
+Iso_S = (w=[0.950, 0.0076, 0.0422], m=[31.97207, 32.97146, 33.96786])
 
-conv_ipv(a, b) = begin
-    map(1:(length(a) + length(b) - 1)) do i
-        l, r = max(1, i - length(b) + 1), min(i, length(a))
-        ms = [x.m + y.m for (x, y) in zip(a[l:r], b[i+1-l:-1:i+1-r])]
-        ws = [x.w * y.w for (x, y) in zip(a[l:r], b[i+1-l:-1:i+1-r])]
-        m, w = sum(ms .* ws), sum(ws)
-        return (m=(w != 0.0 ? m / w : 0.0), w=w)
+"""
+XW, YW: vectors of weights
+XV, YV: vectors of values
+"""
+conv_ipv((XW, XV), (YW, YV)) = begin
+    WX = map(1:(length(XW) + length(YW) - 1)) do i
+        l, r = max(1, i - length(YW) + 1), min(i, length(XW))
+        ws = XW[l:r] .* YW[i+1-l:-1:i+1-r]
+        vs = XV[l:r] .+ YV[i+1-l:-1:i+1-r]
+        v, w = sum(vs .* ws), sum(ws)
+        return w, (w != 0.0 ? v / w : 0.0)
+    end
+    return first.(WX), last.(WX)
+end
+
+read_ipv(io) = begin
+    map(1:2) do _
+        n = read(io, Int64)
+        return map(1:n) do _
+            m = read(io, Int64)
+            return read!(io, Array{Float64}(undef, m))
+        end
+    end |> Tuple
+end
+
+write_ipv(io, (W, V)) = begin
+    for X in (W, V)
+        write(io, Int64(length(X)))
+        for xs in X
+            write(io, Int64(length(xs)), Float64.(xs))
+        end
     end
 end
 
 calc_ipv(ms, E, n_mean, trunc=0.99) = begin
-    m_mono = map(e -> e[begin].m, E)
+    m_mono = map(e -> first(e.m), E)
     n_mean = n_mean ./ sum(n_mean .* m_mono)
-    E = map(e -> map(i -> (m=i.m, w=i.w/sum(x -> x.w, e)), e), E)
-    E = map(e -> map(i -> (m=i.m - e[begin].m, w=i.w), e), E)
-    E = map(e -> [e], E)
+    E = map(e -> [(e.w ./ sum(e.w), e.m .- first(e.m))], E)
     V = @showprogress map(ms) do m
         ns = round.(Int, n_mean .* m)
-        ns[begin] += round(Int, (m - sum(ns .* m_mono)) / m_mono[begin])
-        elements = []
+        ns[begin] += round(Int, (m - sum(ns .* m_mono)) / m_mono[begin]) # fill the rest part with `H`
         for (n, e) in zip(ns, E)
             while length(e) < n push!(e, conv_ipv(e[begin], e[end])) end
-            n > 0 && push!(elements, e[n])
         end
-        v = foldl(conv_ipv, sort(elements, by=length))
-        s = sum(x -> x.w, v)
-        v = map(x -> (m=x.m, w=x.w/s), v)
+        elements = [e[n] for (n, e) in zip(ns, E) if n > 0]
+        v = foldl(conv_ipv, sort(elements, by=length∘first))
+        v = (v[1] ./ sum(v[1]), v[2])
         s = 0.0
         i = 0
         while s < trunc
             i += 1
-            s += v[i].w
+            s += v[1][i]
         end
-        return map(x -> (m=x.m, w=x.w/s), v[begin:i])
+        return v[1][1:i], v[2][1:i]
     end
-    return V
+    return first.(V), last.(V)
 end
 
-build_ipv(fname=joinpath(homedir(), ".PepIso", "IPV.bson"), r=1:20000, trunc=0.99; verbose=true) = begin
-    if isfile(fname)
-        verbose && @info "IPV loading from " * fname
-        BSON.@load fname V
+build_ipv(path=joinpath(homedir(), ".MesMS", "default.ipv"), r=1:20000, trunc=0.99; verbose=true) = begin
+    if isfile(path)
+        verbose && @info "IPV loading from " * path
+        V = open(read_ipv, path)
     else
         verbose && @info "IPV building"
         E = [Iso_H, Iso_C, Iso_N, Iso_O, Iso_S]
         n_mean = sum(a -> a.n .* a.w, aa_elements)
         V = calc_ipv(r, E, n_mean, trunc)
-        verbose && @info "IPV caching as " * fname
-        mkpath(dirname(fname))
-        BSON.@save fname V
+        safe_save(p -> open(io -> write_ipv(io, V), p; write=true), path, "IPV")
     end
     return V
 end
 
-ipv_m(m::Number, V) = map(x -> x.m, V[round(Int, m)])
-ipv_m(ion, V) = ipv_m(ion.mz * ion.z, V)
-ipv_w(m::Number, V) = map(x -> x.w, V[round(Int, m)])
+ipv_w(m::Number, V) = V[1][round(Int, m)]
 ipv_w(ion, V) = ipv_w(ion.mz * ion.z, V)
-ipv_mz(mz::Number, z, n, V) = mz + V[round(Int, mz * z)][n].m / z
-ipv_mz(mz::Number, z, V) = [mz + x.m / z for x in V[round(Int, mz * z)]]
+ipv_m(m::Number, V) = V[2][round(Int, m)]
+ipv_m(ion, V) = ipv_m(ion.mz * ion.z, V)
+ipv_mz(mz::Number, z, n, V) = mz + V[2][round(Int, mz * z)][n] / z
+ipv_mz(mz::Number, z, V) = mz .+ V[2][round(Int, mz * z)] ./ z
 ipv_mz(ion, n, V) = ipv_mz(ion.mz, ion.z, n, V)
-ipv_mz(ion, V) = [ion.mz + x.m / ion.z for x in V[round(Int, ion.mz * ion.z)]]
+ipv_mz(ion, V) = ipv_mz(ion.mz, ion.z, V)
