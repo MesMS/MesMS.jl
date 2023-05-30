@@ -24,10 +24,36 @@ end
 
 write_peak(path::AbstractString, X) = open(io -> write_peak(io, X), path; write=true)
 
-read_ms(path; split=true, verbose=true) = begin
+write_scanmeta(io::IO, M) = begin
+    write(io,
+        "ScanType,ScanID,PeakIndex,TotalIonCurrent,BasePeakIntensity,BasePeakMass,\
+        RetentionTime,IonInjectionTime,\
+        PrecursorScan,ActivationCenter,IsolationWidth,PrecursorMZ,PrecursorCharge\n"
+    )
+    for (i, m) in enumerate(M)
+        if typeof(m) == MS1
+            write(io,
+                "MS1,$(m.id),$(i),$(m.total_ion_current),$(m.base_peak_intensity),$(m.base_peak_mass),\
+                $(m.retention_time),$(m.injection_time),\
+                0,0.0,0.0,0.0,0\n"
+            )
+        elseif typeof(m) == MS2
+            write(io,
+                "MS2,$(m.id),$(i),$(m.total_ion_current),$(m.base_peak_intensity),$(m.base_peak_mass),\
+                $(m.retention_time),$(m.injection_time),\
+                $(m.pre),$(m.activation_center),$(m.isolation_width),\
+                $(join([i.mz for i in m.ions], '|')),$(join([i.z for i in m.ions], '|'))\n"
+            )
+        end
+    end
+end
+
+write_scanmeta(path::AbstractString, M) = open(io -> write_scanmeta(io, M), path; write=true)
+
+read_ms(path, path_meta=splitext(path)[1] * ".scan.csv"; split=true, verbose=true) = begin
     P = read_peak(path; verbose)
-    verbose && @info "scan meta reading from " * splitext(path)[1] * ".scan.csv"
-    meta = CSV.File(splitext(path)[1] * ".scan.csv")
+    verbose && @info "scan meta reading from " * path_meta
+    meta = CSV.File(path_meta)
     n = length(P)
     st = meta.ScanType .|> Symbol
     id = meta.ScanID
@@ -69,29 +95,3 @@ read_ms(path; split=true, verbose=true) = begin
         return M
     end
 end
-
-write_scanmeta(io::IO, M) = begin
-    write(io,
-        "ScanType,ScanID,PeakIndex,TotalIonCurrent,BasePeakIntensity,BasePeakMass,\
-        RetentionTime,IonInjectionTime,\
-        PrecursorScan,ActivationCenter,IsolationWidth,PrecursorMZ,PrecursorCharge\n"
-    )
-    for (i, m) in enumerate(M)
-        if typeof(m) == MS1
-            write(io,
-                "MS1,$(m.id),$(i),$(m.total_ion_current),$(m.base_peak_intensity),$(m.base_peak_mass),\
-                $(m.retention_time),$(m.injection_time),\
-                0,0.0,0.0,0.0,0\n"
-            )
-        elseif typeof(m) == MS2
-            write(io,
-                "MS2,$(m.id),$(i),$(m.total_ion_current),$(m.base_peak_intensity),$(m.base_peak_mass),\
-                $(m.retention_time),$(m.injection_time),\
-                $(m.pre),$(m.activation_center),$(m.isolation_width),\
-                $(join([i.mz for i in m.ions], '|')),$(join([i.z for i in m.ions], '|'))\n"
-            )
-        end
-    end
-end
-
-write_scanmeta(path::AbstractString, M) = open(io -> write_scanmeta(io, M), path; write=true)
