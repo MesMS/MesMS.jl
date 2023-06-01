@@ -51,10 +51,10 @@ _plot_seq!(ax::Makie.Axis, x, y, seq, mods, ions, fontsize, vspace; frag_error=t
         n[(i.part, i.loc)] = get(n, (i.part, i.loc), 0) + 1
         if i.part == :l
             Makie.text!(ax, x + i.loc + 0.1, y - 3/2 * vspace; text="◞", i.color, fontsize=fontsize, align=(:right, :bottom))
-            Makie.text!(ax, x + i.loc, y - (n[(i.part, i.loc)] + 3) / 2 * vspace; text=Makie.L"%$(i.text_abbr)", fontsize=fontsize/3, i.color, align=(:right, :bottom))
+            Makie.text!(ax, x + i.loc, y - (n[(i.part, i.loc)] + 3) / 2 * vspace; text=Makie.L"%$(i.tex_abbr)", fontsize=fontsize/3, i.color, align=(:right, :bottom))
         elseif i.part == :r
             Makie.text!(ax, x + i.loc - 0.1, y + 3/2 * vspace; text="◜", i.color, fontsize=fontsize, align=(:left, :top))
-            Makie.text!(ax, x + i.loc, y + (n[(i.part, i.loc)] + 3) / 2 * vspace; text=Makie.L"%$(i.text_abbr)", fontsize=fontsize/3, i.color, align=(:left, :top))
+            Makie.text!(ax, x + i.loc, y + (n[(i.part, i.loc)] + 3) / 2 * vspace; text=Makie.L"%$(i.tex_abbr)", fontsize=fontsize/3, i.color, align=(:left, :top))
         end
     end
     if frag_error
@@ -113,7 +113,7 @@ MesMS.Plot.spec!(ax::Makie.Axis, spec, ions; vspace=5.0, hspace=1/20, fontsize=8
     ys_ = zeros(length(spec))
     for i in ions
         ys_[i.peak] = max(maximum(ys_[MesMS.argquery_δ(xs_, xs_[i.peak], hspace / 2)]) + vspace, ys[i.peak])
-        Makie.text!(ax, xs[i.peak], ys_[i.peak]; text=Makie.L"%$(i.text)", fontsize, i.color, align=(:center, :bottom))
+        Makie.text!(ax, xs[i.peak], ys_[i.peak]; text=Makie.L"%$(i.tex)", fontsize, i.color, align=(:center, :bottom))
     end
     Makie.ylims!(ax, 0, 114)
     return ax

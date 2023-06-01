@@ -39,8 +39,10 @@ end
 calc_ion(base, δ, z, type, sym, color=:green; sym_abbr=sym) = begin
     (;
         base..., type, sym, mz=(base.mass + δ + z * MesMS.mₚ) / z, z, color,
-        text="\$$(sym)_{$(base.idx)}^{$(z == 1 ? "" : z)+}\$",
-        text_abbr="\$$(sym_abbr)_{$(base.idx)}^{$(z == 1 ? "" : z)+}\$",
+        text="$(sym)($(base.idx))$(z == 1 ? "" : z)+",
+        text_abbr="$(sym_abbr)($(base.idx))$(z == 1 ? "" : z)+",
+        tex="\$$(sym)_{$(base.idx)}^{$(z == 1 ? "" : z)+}\$",
+        tex_abbr="\$$(sym_abbr)_{$(base.idx)}^{$(z == 1 ? "" : z)+}\$",
     )
 end
 

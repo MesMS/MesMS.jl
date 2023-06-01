@@ -87,10 +87,10 @@ _plot_seq!(ax, x, y, seq, mods, ions, font, vspace; frag_error=true) = begin
         n[(i.part, i.loc)] = get(n, (i.part, i.loc), 0) + 1
         if i.part == :l
             ax.text(x + i.loc + 0.3, y - 0.2 * vspace, "┛"; color=i.color, fontsize=font, ha=:right, va=:top)
-            ax.text(x + i.loc, y - 0.2 * vspace - n[(i.part, i.loc)] * 0.4 * vspace, i.text; fontsize=font ÷ 2, color=i.color, ha=:right, va=:top)
+            ax.text(x + i.loc, y - 0.2 * vspace - n[(i.part, i.loc)] * 0.4 * vspace, i.tex_abbr; fontsize=font ÷ 2, color=i.color, ha=:right, va=:top)
         elseif i.part == :r
             ax.text(x + i.loc - 0.3, y + 0.2 * vspace, "┏"; color=i.color, fontsize=font, ha=:left, va=:bottom)
-            ax.text(x + i.loc, y + 0.3 * vspace + n[(i.part, i.loc)] * 0.4 * vspace, i.text; fontsize=font ÷ 2, color=i.color, ha=:left, va=:bottom)
+            ax.text(x + i.loc, y + 0.3 * vspace + n[(i.part, i.loc)] * 0.4 * vspace, i.tex_abbr; fontsize=font ÷ 2, color=i.color, ha=:left, va=:bottom)
         end
     end
     if frag_error
@@ -126,7 +126,7 @@ MesMS.Plot.spec!(ax::PyCall.PyObject, spec, ions; vspace=5.0, hspace=1/20, font=
     ys_ = zeros(length(spec))
     for i in ions
         ys_[i.peak] = max(maximum(ys_[MesMS.argquery_δ(xs_, xs_[i.peak], hspace / 2)]) + vspace, ys[i.peak])
-        ax.text(xs[i.peak], ys_[i.peak], i.text; fontsize=font, i.color, ha=:center, va=:bottom)
+        ax.text(xs[i.peak], ys_[i.peak], i.tex; fontsize=font, i.color, ha=:center, va=:bottom)
     end
     ax.set_xlabel("m/z (Th)")
     ax.set_ylim(0, 114)

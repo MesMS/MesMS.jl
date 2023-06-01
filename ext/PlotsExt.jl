@@ -17,10 +17,10 @@ _plot_seq!(x, y, seq, mods, ions, font, vspace; frag_error=true) = begin
         n[(i.part, i.loc)] = get(n, (i.part, i.loc), 0) + 1
         if i.part == :l
             Plots.annotate!((x + i.loc - 0.1, y - vspace / 3, ("\$\\lrcorner\$", i.color, font)))
-            Plots.annotate!((x + i.loc - 0.5, y - (n[(i.part, i.loc)] / 2 + 0.5) * vspace, (i.text, font ÷ 3, i.color, :left)))
+            Plots.annotate!((x + i.loc - 0.5, y - (n[(i.part, i.loc)] / 2 + 0.5) * vspace, (i.tex_abbr, font ÷ 3, i.color, :left)))
         elseif i.part == :r
             Plots.annotate!((x + i.loc + 0.1, y + vspace / 3, ("\$\\ulcorner\$", i.color, font)))
-            Plots.annotate!((x + i.loc, y + (n[(i.part, i.loc)] / 2 + 0.6) * vspace, (i.text, font ÷ 3, i.color, :left)))
+            Plots.annotate!((x + i.loc, y + (n[(i.part, i.loc)] / 2 + 0.6) * vspace, (i.tex_abbr, font ÷ 3, i.color, :left)))
         end
     end
     if frag_error
@@ -68,7 +68,7 @@ MesMS.Plot.spec!(p::Plots.Plot, spec, ions; vspace=5.0, hspace=1/20, font=4, lin
     ys_ = zeros(length(spec))
     for i in ions
         ys_[i.peak] = max(maximum(ys_[MesMS.argquery_δ(xs_, xs_[i.peak], hspace / 2)]) + vspace, ys[i.peak])
-        Plots.annotate!((xs[i.peak], ys_[i.peak], (i.text, font, i.color, :bottom)))
+        Plots.annotate!((xs[i.peak], ys_[i.peak], (i.tex, font, i.color, :bottom)))
     end
     return Plots.plot!(p; ylim=(0, 114), frame)
 end
