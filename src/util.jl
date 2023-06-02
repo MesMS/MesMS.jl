@@ -3,9 +3,13 @@ using Dates
 split(str::AbstractString, args...; kwargs...) = Base.split(str, args...; kwargs...)
 split(::Missing, args...; kwargs...) = SubString{AbstractString}[]
 
-match_path(path, ext=""; join=true, self=true) = begin
+match_path(path, ext=""::Union{AbstractString, AbstractArray{AbstractString}};
+    join=true, self=true,
+) = begin
+    if isa(ext, AbstractString) ext = [ext] end
     files = filter(readdir(dirname(path))) do f
-        (self && (f == basename(path))) || (startswith(f, basename(path)) && endswith(f, ext))
+        (self && (f == basename(path))) ||
+        (startswith(f, basename(path)) && (isempty(ext) || any(e -> endswith(f, e), ext)))
     end
     return join ? joinpath.(dirname(path), files) : files
 end
