@@ -30,3 +30,16 @@ Base.@kwdef struct MS2 <: AbstractTandemMS
 end
 
 dict_by_id(M::AbstractArray{<:AbstractMS}) = Dict([m.id => m for m in M])
+
+read_ms(path; MS1=true, MS2=true, verbose=true) = begin
+    if endswith(lowercase(path), ".mes")
+        return read_mes(path; verbose)
+    elseif endswith(lowercase(path), ".ms1") || endswith(lowercase(path), ".ms2")
+        MS = (;)
+        if MS1 MS = (; MS..., MS1=read_ms1(splitext(path)[1] * ".ms1"; verbose)) end
+        if MS2 MS = (; MS..., MS2=read_ms1(splitext(path)[1] * ".ms2"; verbose)) end
+        return MS
+    else
+        error("unknown MS file type: " * path)
+    end
+end
