@@ -36,7 +36,7 @@ Base.show(io::IO, m::MS1) = begin
         TIC=$(round(m.total_ion_current; digits=2)), \
         BPI=$(round(m.base_peak_intensity; digits=2)), \
         BPM=$(round(m.base_peak_mass; digits=2)), \
-        #peak=$(length(m.peaks)))"
+        #P=$(length(m.peaks)))"
     )
     return nothing
 end
@@ -50,7 +50,7 @@ Base.show(io::IO, m::MS2) = begin
         TIC=$(round(m.total_ion_current; digits=2)), \
         BPI=$(round(m.base_peak_intensity; digits=2)), \
         BPM=$(round(m.base_peak_mass; digits=2)), \
-        #peak=$(length(m.peaks)))"
+        #P=$(length(m.peaks)))"
     )
     return nothing
 end
