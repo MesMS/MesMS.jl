@@ -29,6 +29,32 @@ Base.@kwdef struct MS2 <: AbstractTandemMS
     peaks::Vector{<:AbstractPeak} = Peak[]
 end
 
+Base.show(io::IO, m::MS1) = begin
+    write(io, "$(m.type)#$(m.id)(\
+        RT=$(round(m.retention_time; digits=2)), \
+        IT=$(round(m.injection_time; digits=2)), \
+        TIC=$(round(m.total_ion_current; digits=2)), \
+        BPI=$(round(m.base_peak_intensity; digits=2)), \
+        BPM=$(round(m.base_peak_mass; digits=2)), \
+        #peak=$(length(m.peaks)))"
+    )
+    return nothing
+end
+
+Base.show(io::IO, m::MS2) = begin
+    write(io, "$(m.type)#$(m.id)(\
+        #$(m.pre)@$(round(m.activation_center; digits=4))±$(round(m.isolation_width/2; digits=2)), \
+        [$(join(string.(m.ions), ','))], \
+        RT=$(round(m.retention_time; digits=2)), \
+        IT=$(round(m.injection_time; digits=2)), \
+        TIC=$(round(m.total_ion_current; digits=2)), \
+        BPI=$(round(m.base_peak_intensity; digits=2)), \
+        BPM=$(round(m.base_peak_mass; digits=2)), \
+        #peak=$(length(m.peaks)))"
+    )
+    return nothing
+end
+
 dict_by_id(M::AbstractArray{<:AbstractMS}) = Dict([m.id => m for m in M])
 
 read_ms(path; MS1=true, MS2=true, verbose=true) = begin

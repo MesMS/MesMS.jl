@@ -8,3 +8,11 @@ struct Ion <: AbstractIon
     m::Float64
     Ion(mz, z) = new(mz, z, mz * z)
 end
+
+Base.show(io::IO, i::Ion) = begin
+    if i.z > 0 write(io, "(m/z=$(i.mz))$(i.z == 1 ? "" : supscript(string.(i.z)))⁺")
+    elseif i.z < 0 write(io, "(m/z=$(i.mz))$(i.z == -1 ? "" : supscript(string.(-i.z)))⁻")
+    else write(io, "(m/z=$(i.mz))⁰")
+    end
+    return nothing
+end

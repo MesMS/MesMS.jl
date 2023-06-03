@@ -1,5 +1,40 @@
 using Dates
 
+"convert a char to its subscript form"
+subscript(c::Char) = begin
+    if '0' ≤ c ≤ '9' return Char(0x2080 + c - '0')
+    elseif c == '+' return '₊'
+    elseif c == '-' return '₋'
+    elseif c == '=' return '₌'
+    elseif c == '(' return '₍'
+    elseif c == ')' return '₎'
+    else return c
+    end
+end
+subscript(s::AbstractString) = join(subscript.(collect(s)))
+
+"convert a char to its supscript form"
+supscript(c::Char) = begin
+    if c == '0' return '⁰'
+    elseif c == '1' return '¹'
+    elseif c == '2' return '²'
+    elseif c == '3' return '³'
+    elseif c == '4' return '⁴'
+    elseif c == '5' return '⁵'
+    elseif c == '6' return '⁶'
+    elseif c == '7' return '⁷'
+    elseif c == '8' return '⁸'
+    elseif c == '9' return '⁹'
+    elseif c == '+' return '⁺'
+    elseif c == '-' return '⁻'
+    elseif c == '=' return '⁼'
+    elseif c == '(' return '⁽'
+    elseif c == ')' return '⁾'
+    else return c
+    end
+end
+supscript(s::AbstractString) = join(supscript.(collect(s)))
+
 split(str::AbstractString, args...; kwargs...) = Base.split(str, args...; kwargs...)
 split(::Missing, args...; kwargs...) = SubString{AbstractString}[]
 

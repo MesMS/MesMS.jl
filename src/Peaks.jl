@@ -9,6 +9,11 @@ struct Peak <: AbstractPeak
     inten::Float64
 end
 
+Base.show(io::IO, p::Peak) = begin
+    write(io, "$(p.mz)($(round(p.inten; sigdigits=2)))")
+    return nothing
+end
+
 merge_peaks(peaks, ε) = begin
     ans = empty(peaks)
     if isempty(peaks)
