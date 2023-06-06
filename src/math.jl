@@ -22,7 +22,7 @@ mz_to_mh(mz, z) = begin
     return 0.0
 end
 
-calc_centroid(xs, ws) = begin
+centroid(xs, ws) = begin
     if xs[begin] == xs[end]
         return xs[begin], mean(ws)
     else
