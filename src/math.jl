@@ -33,6 +33,8 @@ calc_centroid(xs, ws) = begin
     end
 end
 
+weighted_mean(xs, ws) = sum(xs .* ws) / sum(ws)
+
 log_softer(s=1) = x -> copysign(s * (log(abs(x) + s) - log(s)), x)
 exp_softer(s=1) = x -> x * exp(-abs(x)/s)
 
