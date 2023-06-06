@@ -25,4 +25,4 @@ Base.show(io::IO, f::MesMS.Formula) = begin
     return nothing
 end
 
-calc_mass(f::Formula, tab::NamedTuple) = sum(f[n] * tab[n] for n in propertynames(f); init=0.0)
+mass(f::Formula, tab::NamedTuple) = sum(f[n] * tab[n] for n in propertynames(f); init=0.0)

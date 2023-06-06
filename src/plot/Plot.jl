@@ -65,7 +65,7 @@ end
 
 build_ions(spec, seq, mods, ε, tab_ele, tab_aa, tab_mod; types=[(ion_b, 1:2), (ion_y, 1:2)], abu=false) = begin
     base = calc_base(lsum_seq(seq, mods, tab_aa, tab_mod))
-    ions = [calc_ion(i, MesMS.calc_mass(t.Δ, tab_ele), z, t.type, t.sym, t.color) for (t, zs) in types for z in zs for i in base[t.part]]
+    ions = [calc_ion(i, MesMS.mass(t.Δ, tab_ele), z, t.type, t.sym, t.color) for (t, zs) in types for z in zs for i in base[t.part]]
     ions = [match_peak(spec, ion, ε; abu) for ion in ions]
     return ions
 end
@@ -77,10 +77,10 @@ build_ions_xl(spec, seqs, modss, linker, sites, ε, tab_ele, tab_aa, tab_mod; ty
         if linker.cleavable
             base = calc_base(seq, [(m, site, "'"^i) for (i, m) in enumerate(linker.masses)])
         else
-            seq[site:end] .+= another + linker.mass + MesMS.calc_mass(MesMS.Formula(H=2, O=1), tab_ele)
+            seq[site:end] .+= another + linker.mass + MesMS.mass(MesMS.Formula(H=2, O=1), tab_ele)
             base = calc_base(seq)
         end
-        ions = [calc_ion(i, MesMS.calc_mass(t.Δ, tab_ele), z, t.type, "$(pep_sym)$(i.var)$(t.sym)", t.color; sym_abbr="$(i.var)$(t.sym)") for (t, zs) in types for z in zs for i in base[t.part]]
+        ions = [calc_ion(i, MesMS.mass(t.Δ, tab_ele), z, t.type, "$(pep_sym)$(i.var)$(t.sym)", t.color; sym_abbr="$(i.var)$(t.sym)") for (t, zs) in types for z in zs for i in base[t.part]]
         ions = [match_peak(spec, ion, ε; abu) for ion in ions]
         x = maximum(sites) - site
         return [(; ion..., loc_=ion.loc + x + offset, shape) for ion in ions]
