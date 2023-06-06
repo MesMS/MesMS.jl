@@ -39,6 +39,10 @@ end
 log_softer(s=1) = x -> copysign(s * (log(abs(x) + s) - log(s)), x)
 exp_softer(s=1) = x -> x * exp(-abs(x)/s)
 
+"linear interpolation between `a` and `b` with distance `δa` (and `δb`)"
+lerp(a, b, δa) = a + (b - a) * δa
+lerp(a, b, δa, δb) = lerp(a, b, δa / (δa + δb)) # == (δb * a + δa * b) / (δa + δb)
+
 calc_tda_fdr_xl(xs, r=1.0) = begin
     tt, td, dd = 0, 0, 0
     fdr = zeros(length(xs))
