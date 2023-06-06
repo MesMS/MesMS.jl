@@ -23,9 +23,6 @@ mz_to_mh(mz, z) = begin
 end
 
 calc_centroid(xs, ws) = begin
-    # TODO: the `@assert` may be skipped at runtime
-    @assert length(xs) == length(ws) "`xs` and `ws` are not of the same length"
-    @assert !isempty(xs) "`xs` and `ws` are both empty"
     if xs[begin] == xs[end]
         return xs[begin], mean(ws)
     else
