@@ -109,3 +109,4 @@ ipv_mz(mz::Number, z, n, V) = mz + V[2][round(Int, mz * z)][n] / z
 ipv_mz(mz::Number, z, V) = mz .+ V[2][round(Int, mz * z)] ./ z
 ipv_mz(ion, n, V) = ipv_mz(ion.mz, ion.z, n, V)
 ipv_mz(ion, V) = ipv_mz(ion.mz, ion.z, V)
+ipv_max(V) = length(V[1])
