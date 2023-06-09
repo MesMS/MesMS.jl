@@ -49,7 +49,7 @@ match_path(path, ext=""::Union{AbstractString, AbstractArray{AbstractString}};
     return join ? joinpath.(dirname(path), files) : files
 end
 
-read_all(reader, path, ext=""; verbose=true, single=false, key=first∘splitext∘basename) = begin
+read_all(reader, path::AbstractString, ext=""; verbose=true, single=false, key=first∘splitext∘basename) = begin
     paths = match_path(path, ext)
     if single && length(paths) > 1
         @warn "multiple files found: path=$(path), ext=$(ext)"
@@ -58,6 +58,10 @@ read_all(reader, path, ext=""; verbose=true, single=false, key=first∘splitext�
         verbose && @info "reading from " * p
         key(p) => reader(p)
     end |> Dict
+end
+
+read_all(reader, paths::AbstractArray{AbstractString}, ext=""; verbose=true, single=false, key=first∘splitext∘basename) = begin
+    isempty(paths) ? Dict() : reduce(merge, map(p -> read_all(reader, p, ext; verbose, single, key), paths))
 end
 
 parse_range(::Type{T}, s::AbstractString) where T = begin
