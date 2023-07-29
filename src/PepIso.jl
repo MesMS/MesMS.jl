@@ -67,11 +67,22 @@ calc_match_lp(xs, cs, δs) = begin
     end
 end
 
+calc_mono_error_lp(xs, cs, δs) = begin
+    map(eachindex(xs)) do i
+        s = map(c -> any(s -> s.i == i, c.slots), cs)
+        for (c, δ) in zip(cs[s], δs[s])
+            any(s -> s.j == 1, c.slots) && return abs(δ) / c.inten
+        end
+        return Inf
+    end
+end
+
 evaluate_lp(ions, spec, ε, V) = begin
     cs = build_constraints_lp(ions, spec, ε, V)
     xs, δs = solve_lp(ions, cs, V)
     ms = calc_match_lp(xs, cs, δs)
-    return xs, ms
+    es = calc_mono_error_lp(xs, cs, δs)
+    return xs, ms, es
 end
 
 build_constraints_rlp(ions, spec, ε, V) = begin
@@ -129,11 +140,11 @@ evaluate_rlp(ions, spec, ε, V) = begin
 end
 
 _deisotope(f, ions, spec, τ_max, ε, V) = begin
-    xs = ms = nothing
+    xs = ms = es = nothing
     τs = [τ_max / 4, τ_max / 2, τ_max]
     τ = popfirst!(τs)
     while true
-        xs, ms = f(ions, spec, ε, V)
+        xs, ms, es = f(ions, spec, ε, V)
         s = exclude(ions, xs, ms, τ, ε, V)
         while all(s)
             isempty(τs) && @goto done
@@ -143,7 +154,7 @@ _deisotope(f, ions, spec, τ_max, ε, V) = begin
         ions = ions[s]
     end
     @label done
-    return [(; i.mz, i.z, x, m) for (i, x, m) in zip(ions, xs, ms)]
+    return [(; i.mz, i.z, x, m, e) for (i, x, m, e) in zip(ions, xs, ms, es)]
 end
 
 deisotope(f, ions, spec, τ_max, ε, V; split=false) = begin
